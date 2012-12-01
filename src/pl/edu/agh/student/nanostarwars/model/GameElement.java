@@ -8,17 +8,17 @@ public abstract class GameElement {
 	protected Vec position;
 	
 	protected Bitmap bitmap;
-
-	/**
-	 * 0 = human player, >0 computers
-	 */
-	protected int team;
 	
-	public GameElement(Bitmap bitmap, Vec position, int team) {
+	public GameElement(Bitmap bitmap, Vec position, Player player) {
 		this.bitmap = bitmap;
 		this.position = position;
 	}
 
+	public GameElement() {
+		this.bitmap = null;
+		this.position = null;
+	}
+	
 	public void draw(Canvas canvas) {
 		canvas.drawBitmap(bitmap, position.x(), position.y(), null);
 	}

@@ -3,19 +3,28 @@ package pl.edu.agh.student.nanostarwars.model;
 public class Vec {
 
 	private int x;
+
 	private int y;
 
+	public void setX(int x) {
+		this.x = x;
+	}
+
+	public void setY(int y) {
+		this.y = y;
+	}
+	
 	public Vec(int x, int y) {
 		this.x = x;
 		this.y = y;
 	}
 
 	public int y() {
-		return x;
+		return y;
 	}
 
 	public int x() {
-		return y;
+		return x;
 	}
 
 	public boolean equals(Object thatObj) {
@@ -30,5 +39,9 @@ public class Vec {
 	
 	protected boolean testEquals(Vec that) {
 		return this.x() == that.x() && this.y() == that.y();
+	}
+	
+	public static double distance(Vec a, Vec b){
+		return Math.sqrt((a.x()-b.x())*(a.x()-b.x())+(a.y()-b.y())*(a.y()-b.y()));
 	}
 }

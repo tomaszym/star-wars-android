@@ -4,8 +4,8 @@ import android.graphics.Bitmap;
 
 public class Missle extends GameElement {
 
-	public Missle(Bitmap bitmap, Vec position, int team) {
-		super(bitmap, position, team);
+	public Missle(Bitmap bitmap, Vec position, Player player) {
+		super(bitmap, position, player);
 		// TODO Auto-generated constructor stub
 	}
 
