@@ -44,4 +44,11 @@ public class Vec {
 	public static double distance(Vec a, Vec b){
 		return Math.sqrt((a.x()-b.x())*(a.x()-b.x())+(a.y()-b.y())*(a.y()-b.y()));
 	}
+
+	public static double rotation(Vec sourcePosition, Vec destPosition) {
+		int delta_x = destPosition.x() - sourcePosition.x();
+		int delta_y = destPosition.y() - sourcePosition.y();
+		double theta_radians = Math.atan2(delta_y, delta_x);
+		return theta_radians;
+	}
 }

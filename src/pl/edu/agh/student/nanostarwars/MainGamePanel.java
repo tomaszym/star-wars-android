@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Random;
 
 import pl.edu.agh.student.nanostarwars.model.Player;
+import pl.edu.agh.student.nanostarwars.model.Pointer;
 import pl.edu.agh.student.nanostarwars.model.Star;
 import pl.edu.agh.student.nanostarwars.model.Vec;
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.view.MotionEvent;
@@ -21,6 +23,7 @@ public class MainGamePanel extends SurfaceView implements
 	private List<Player> players = null;
 	private List<Star> stars = null;
 	Star selectedStar;
+	Pointer userPointer;
 
 	public MainGamePanel(Context context) {
 		super(context);
@@ -28,8 +31,9 @@ public class MainGamePanel extends SurfaceView implements
 		getHolder().addCallback(this);
 		setFocusable(true);
 
-		players = new ArrayList<Player>();
-		stars = new ArrayList<Star>();
+		this.players = new ArrayList<Player>();
+		this.stars = new ArrayList<Star>();
+		this.userPointer = new Pointer(BitmapFactory.decodeResource(getResources(), R.drawable.arrow),null,null);
 	}
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
@@ -48,11 +52,12 @@ public class MainGamePanel extends SurfaceView implements
 		while (stars.size() < starsCount) {
 			Random randomize = new Random();
 			int size = randomize.nextInt(30) + 20;
-			Vec position = new Vec(randomize.nextInt(getWidth()-2*size)+size,
-					randomize.nextInt(getHeight()-2*size)+size);
+			Vec position = new Vec(randomize.nextInt(getWidth() - 2 * size)
+					+ size, randomize.nextInt(getHeight() - 2 * size) + size);
 			boolean safeDistance = true;
 			for (Star otherStar : stars) {
-				if (Vec.distance(position, otherStar.getPosition()) < size + otherStar.getSize() + 10) {
+				if (Vec.distance(position, otherStar.getPosition()) < size
+						+ otherStar.getSize() + 10) {
 					safeDistance = false;
 				}
 			}
@@ -73,10 +78,13 @@ public class MainGamePanel extends SurfaceView implements
 		}
 	}
 
-
 	protected void render(Canvas canvas) {
+		canvas.drawColor(Color.BLACK);
 		for (Star star : stars) {
 			star.draw(canvas);
+		}
+		if (userPointer.isVisible()){
+			userPointer.draw(canvas);
 		}
 	}
 
@@ -84,38 +92,37 @@ public class MainGamePanel extends SurfaceView implements
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		int eventaction = event.getAction();
-		int X = (int) event.getX();
-		int Y = (int) event.getY();
-		switch (eventaction) {
+		int eventAction = event.getAction();
+		Vec touchPosition = new Vec((int) event.getX(), (int) event.getY());
+		switch (eventAction) {
 		case MotionEvent.ACTION_DOWN: // touch down so check if the finger is on
 			for (Star star : stars) {
-				// check all the bounds of the ball
-				if (Vec.distance(star.getPosition(), new Vec(X,Y)) < star.getSize()+50) {
-					this.selectedStar = star;
+				if (Vec.distance(star.getPosition(), touchPosition) < star
+						.getSize() + 50) {
+					selectedStar = star;
+					userPointer.setSourcePosition(star.getPosition());
 					break;
 				}
-				double dist= Vec.distance(star.getPosition(), new Vec(X,Y));
-				double dist2= star.getSize()+50;
 			}
 			break;
-		case MotionEvent.ACTION_MOVE: // touch drag with the ball
-
-			// move the balls the same as the finger
-
-			this.selectedStar.getPosition().setX(X);
-
-			this.selectedStar.getPosition().setY(Y);
+		case MotionEvent.ACTION_MOVE:
+			if (selectedStar != null) {
+				userPointer.setDestPosition(touchPosition);
+				userPointer.show();
+			}
 
 			break;
 
-		case MotionEvent.ACTION_UP:
-
-			this.selectedStar.getPosition().setX(X);
-
-			this.selectedStar.getPosition().setY(Y);
-			// touch drop - just do things here after dropping
-
+		case MotionEvent.ACTION_UP: // touch drop - just do things here after dropping
+			for (Star star : stars) {
+				if (star != selectedStar && (Vec.distance(star.getPosition(), touchPosition) < star.getSize() + 50)) {
+					selectedStar.sendMissiles(star);
+					selectedStar = null;
+					break;
+				}
+			}
+			selectedStar = null;
+			userPointer.hide();
 			break;
 
 		}
@@ -127,4 +134,10 @@ public class MainGamePanel extends SurfaceView implements
 		return true;
 	}
 	
+	public void update() {
+		for(Star star : stars){
+			star.update();
+		}
+	}
+
 }
