@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import pl.edu.agh.student.nanostarwars.model.Missile;
 import pl.edu.agh.student.nanostarwars.model.Player;
 import pl.edu.agh.student.nanostarwars.model.Pointer;
 import pl.edu.agh.student.nanostarwars.model.Star;
@@ -20,8 +21,10 @@ public class MainGamePanel extends SurfaceView implements
 		SurfaceHolder.Callback {
 	private MainThread thread;
 
+	private int speed = 10;
 	private List<Player> players = null;
 	private List<Star> stars = null;
+	private List<Missile> missiles = null;
 	Star selectedStar;
 	Pointer userPointer;
 
@@ -33,6 +36,7 @@ public class MainGamePanel extends SurfaceView implements
 
 		this.players = new ArrayList<Player>();
 		this.stars = new ArrayList<Star>();
+		this.missiles = new ArrayList<Missile>();
 		this.userPointer = new Pointer(BitmapFactory.decodeResource(getResources(), R.drawable.arrow),null,null);
 	}
 
@@ -117,7 +121,7 @@ public class MainGamePanel extends SurfaceView implements
 			if (selectedStar != null) {
 				for (Star star : stars) {
 					if (star != selectedStar && (Vec.distance(star.getPosition(), touchPosition) < star.getSize() + 50)) {
-						selectedStar.sendMissiles(star);
+						selectedStar.sendMissile(star);
 						selectedStar = null;
 						break;
 					}
