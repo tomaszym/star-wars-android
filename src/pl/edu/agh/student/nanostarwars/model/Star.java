@@ -31,7 +31,7 @@ public class Star extends GameElement {
 	}
 
 	@Override
-	public void update() {
+	public synchronized void update() {
 		this.spawnCounter++;
 		if(spawnCounter >= 1000/size){
 			missiles.add(new Missile(this.player));
@@ -65,7 +65,7 @@ public class Star extends GameElement {
 	}
 
 
-	public void sendMissiles(Star star) {
+	public synchronized void sendMissiles(Star star) {
 		star.missiles.addAll(this.missiles);
 	}
 }

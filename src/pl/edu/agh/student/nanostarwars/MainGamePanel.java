@@ -114,11 +114,13 @@ public class MainGamePanel extends SurfaceView implements
 			break;
 
 		case MotionEvent.ACTION_UP: // touch drop - just do things here after dropping
-			for (Star star : stars) {
-				if (star != selectedStar && (Vec.distance(star.getPosition(), touchPosition) < star.getSize() + 50)) {
-					selectedStar.sendMissiles(star);
-					selectedStar = null;
-					break;
+			if (selectedStar != null) {
+				for (Star star : stars) {
+					if (star != selectedStar && (Vec.distance(star.getPosition(), touchPosition) < star.getSize() + 50)) {
+						selectedStar.sendMissiles(star);
+						selectedStar = null;
+						break;
+					}
 				}
 			}
 			selectedStar = null;
