@@ -20,6 +20,7 @@ import android.view.SurfaceView;
 public class MainGamePanel extends SurfaceView implements
 		SurfaceHolder.Callback {
 	private MainThread thread;
+	private Random randomize = null;
 
 	private int speed = 10;
 	private List<Player> players = null;
@@ -34,6 +35,7 @@ public class MainGamePanel extends SurfaceView implements
 		getHolder().addCallback(this);
 		setFocusable(true);
 
+		this.randomize = new Random();
 		this.players = new ArrayList<Player>();
 		this.stars = new ArrayList<Star>();
 		this.missiles = new ArrayList<Missile>();
@@ -52,23 +54,33 @@ public class MainGamePanel extends SurfaceView implements
 		thread.start();
 	}
 
-	public void generateMap(int starsCount) {
-		while (stars.size() < starsCount) {
-			Random randomize = new Random();
-			int size = randomize.nextInt(30) + 20;
+	public void generateMap(int neutralCount) {
+		while (stars.size() < neutralCount) {
+			int size = randomize.nextInt(20) + 10 + randomize.nextInt(20);
 			Vec position = new Vec(randomize.nextInt(getWidth() - 2 * size)
 					+ size, randomize.nextInt(getHeight() - 2 * size) + size);
-			boolean safeDistance = true;
-			for (Star otherStar : stars) {
-				if (Vec.distance(position, otherStar.getPosition()) < size
-						+ otherStar.getSize() + 10) {
-					safeDistance = false;
-				}
-			}
-			if (safeDistance) {
+			
+			if (safeDistance(position, size)) {
 				stars.add(new Star(null, position, null, size));
 			}
 		}
+		
+		int size = 15;
+		Vec position = new Vec(randomize.nextInt(getWidth() - 2 * size)
+				+ size, randomize.nextInt(getHeight() - 2 * size) + size);
+		stars.add(new Star(null,position, new Player(1, Color.GREEN), size));
+	}
+
+	private boolean safeDistance(Vec position, int size) {
+		boolean safeDistance = true;
+		for (Star otherStar : stars) {
+			if (Vec.distance(position, otherStar.getPosition()) < size
+					+ otherStar.getSize() + 10) {
+				safeDistance = false;
+				break;
+			}
+		}
+		return safeDistance;
 	}
 
 	public void surfaceDestroyed(SurfaceHolder holder) {

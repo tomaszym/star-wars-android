@@ -2,9 +2,6 @@ package pl.edu.agh.student.nanostarwars.model;
 
 import android.graphics.Paint;
 
-/**
- * Dzięki, że nie zrobiłeś enumów! :D
- */
 public class Player {
 
 	/**

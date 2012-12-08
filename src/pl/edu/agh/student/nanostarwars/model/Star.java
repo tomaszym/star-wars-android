@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
 
 public class Star extends GameElement {
 	
@@ -14,33 +15,24 @@ public class Star extends GameElement {
 	 * How many points does the star have?
 	 */
 	private int points;
+	
 	/**
-	 * Where it is
+	 * Size of the star. Bigger star = quicker points growth
 	 */
-	private Vec position;
+	int size;
+	public int getSize() {return size;}
+	
 	/**
-	 * Who does it belong to
-	 */
-	private Player player;
-	/**
-	 * What's this?
+	 * How many updates to point incrementation
 	 */
 	private int spawnCounter;
-	/**
-	 * Returns size of the star for display purposes.
-	 * @return
-	 */
-	public int getSize() {
-		/**
-		 * wtf floor zwraca double? :D
-		 */
-		return (int) Math.max(Math.floor(Math.sqrt(points)), 50);
-	}
+	
+	public int getPoints() {return points;}
 	
 	public Star(Bitmap bitmap, Vec position, Player player, int size) {
 		super(bitmap, position, player);
 		
-		this.position = position;
+		this.size = size;
 		this.points = 0;
 		this.spawnCounter = 0;
 	}
@@ -48,13 +40,9 @@ public class Star extends GameElement {
 	@Override
 	public synchronized void update() {
 		this.spawnCounter++;
-//		if(spawnCounter >= 1000/size){
-//			missiles.add(new Missile(this.player));
-//			this.spawnCounter = 0;
-//		}
-		if(spawnCounter > 2) {
+		if(spawnCounter >= 1000/size){
 			points++;
-			spawnCounter = 0;
+			this.spawnCounter = 0;
 		}
 	}
 	
@@ -63,18 +51,24 @@ public class Star extends GameElement {
 			Paint bgPaint = new Paint();
 			bgPaint.setColor(Color.GRAY);
 			canvas.drawCircle(this.position.x(), this.position.y(), this.getSize(), bgPaint);
-			Paint txtPaint = new Paint();
-			txtPaint.setColor(Color.WHITE);
-			txtPaint.setTextSize((int)(this.getSize()/1.5));
-			canvas.drawText(Integer.toString(this.getSize()),
-							this.position.x()-txtPaint.measureText(Integer.toString(this.getSize()))/2,
-							this.position.y()+this.getSize()/6,
-							txtPaint);
+			drawPointsOnStar(canvas);
 		}
 		else{
-			canvas.drawCircle(this.position.x(), this.position.y(), this.getSize(), player.getColor());
+			canvas.drawCircle(this.position.x(), this.position.y(), this.getSize(), player.getColor());	
+			drawPointsOnStar(canvas);
 		}
 	}
+
+	private void drawPointsOnStar(Canvas canvas) {
+		Paint txtPaint = new Paint();
+		txtPaint.setColor(Color.WHITE);
+		txtPaint.setTextSize((int)(this.getSize()/1.5));
+		canvas.drawText(Integer.toString(this.getPoints()),
+						this.position.x()-txtPaint.measureText(Integer.toString(this.getSize()))/2,
+						this.position.y()+this.getSize()/6,
+						txtPaint);
+	}
+	
 	
 	public void setPosition(int x, int y){
 		this.position.setX(x);
