@@ -47,15 +47,19 @@ public class EnemyThread extends Thread {
 					Iterator<Star> agressiveStars = getStars(agressor);
 					Log.d("EnemyThread", "agressors picked");
 					
-					
-					Player victim = players.get(0);
-					Star victimStar = getWeakestStar(victim);
+					Star victimStar = getWeakestStar(agressor);
 					
 					Log.d("EnemyThread", "victim picked");
-					
-					while(agressiveStars.hasNext()) {
-						Log.d("EnemyThread", "FIRE!!");
-						agressiveStars.next().sendMissile(victimStar);
+					if(victimStar == null){
+						Log.d("EnemyThread", "no weakest star");
+					}
+					else{
+						while(agressiveStars.hasNext()) {
+							Log.d("EnemyThread", "FIRE!!");
+							Star agressiveStar = agressiveStars.next();
+							missiles.add(agressiveStar.sendMissile(victimStar));
+							Log.d("EnemyThread", agressiveStar.getPoints() + " > " + victimStar.getPoints());
+						}
 					}
 				}
 			} 
@@ -64,7 +68,7 @@ public class EnemyThread extends Thread {
 		}
 		
 	}
-	
+
 	private Iterator<Star> getStars(Player p) {
 		List<Star> list = new LinkedList<Star>();
 		synchronized(players) {
@@ -76,27 +80,51 @@ public class EnemyThread extends Thread {
 				}				
 			}
 		}
-		return list.subList(0, rand.nextInt(list.size())).iterator();
+		return list.iterator();
+	}
+	
+	private Iterator<Star> getTargets(Player p) {
+		List<Star> list = new LinkedList<Star>();
+		synchronized(players) {
+			synchronized(stars){
+				for(Star s: stars) {
+					if(!p.equals(s.getPlayer())) {
+						list.add(s);
+					}
+				}				
+			}
+		}
+		return list.iterator();
 	}
 	
 	private Star getWeakestStar(Player p) {
-		Iterator<Star> it = getStars(p);
+		Iterator<Star> targetIterator = getTargets(p);
+		Iterator<Star> starsIterator = getStars(p);
 		Star weakest = null;
 		Star tmp = null;
-		if(it.hasNext())
-			weakest = it.next();
+		int availablePoints = 0;
+		if(targetIterator.hasNext())
+			weakest = targetIterator.next();
 		else
 			return null;
 		synchronized(players) {
 			synchronized(stars) {
-				if(it.hasNext()) {
-					tmp = it.next();
+				while(starsIterator.hasNext()) {
+					tmp = starsIterator.next();
+					availablePoints += tmp.getPoints()/2;
+				}
+				while(targetIterator.hasNext()) {
+					tmp = targetIterator.next();
 					if(tmp.getPoints() < weakest.getPoints())
 						weakest = tmp;
 				}
 			}
 		}
-		return weakest;
+		if(availablePoints > weakest.getPoints()){
+			return weakest;
+		}else{
+			return null;
+		}
 	}
 	
 	

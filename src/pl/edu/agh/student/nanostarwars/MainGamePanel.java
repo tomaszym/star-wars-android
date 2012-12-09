@@ -25,6 +25,9 @@ public class MainGamePanel extends SurfaceView implements
 	private MainThread thread;
 	private EnemyThread enemyThread;
 	private Random randomize = null;
+	public Status gameStatus;
+	
+	public enum Status {RUNNING, VICTORY, DEFEAT};
 
 	private Vibrator vibrator;
 	private int speed = 10;
@@ -45,7 +48,8 @@ public class MainGamePanel extends SurfaceView implements
 		thread = new MainThread(getHolder(), this);
 		getHolder().addCallback(this);
 		setFocusable(true);
-
+		
+		this.gameStatus = Status.RUNNING;
 		this.randomize = new Random();
 		this.players = new ArrayList<Player>();
 		this.stars = new ArrayList<Star>();
@@ -95,9 +99,12 @@ public class MainGamePanel extends SurfaceView implements
 		}
 		
 		for(int i=0; i<playersCount; i++) {
-			int size = 15;
-			Vec position = new Vec(randomize.nextInt(getWidth() - 2 * size)
-					+ size, randomize.nextInt(getHeight() - 2 * size) + size);
+			int size = 30;
+			Vec position;
+			do{
+				position = new Vec(randomize.nextInt(getWidth() - 2 * size)
+						+ size, randomize.nextInt(getHeight() - 2 * size) + size);
+			}while(!safeDistance(position, size));
 			synchronized(players) {
 				stars.add(new Star(starBitmap,position, players.get(i), size));	
 			}
@@ -159,7 +166,7 @@ public class MainGamePanel extends SurfaceView implements
 		switch (eventAction) {
 		case MotionEvent.ACTION_DOWN: // touch down so check if the finger is on
 			for (Star star : stars) {
-				if (Vec.distance(star.getPosition(), touchPosition) < star.getSize() + 50 && star.hasPlayer()) {
+				if (Vec.distance(star.getPosition(), touchPosition) < star.getSize() + 50 && star.hasPlayer() && star.getPlayer().getNumber()==0) {
 					selectedStar = star;
 					userPointer.setSourcePosition(star.getPosition());
 					break;
@@ -200,17 +207,29 @@ public class MainGamePanel extends SurfaceView implements
 	}
 	
 	public void update() {
+		int playerStars = 0;
+		int enemyStars = 0;
 		synchronized(stars) {
 			for(Star star : stars){
 				star.update();
+				if(star.hasPlayer()){
+					if(star.getPlayer().getNumber() == 0){
+						playerStars++;
+					}else{
+						enemyStars++;
+					}
+				}
 			}
 		}
+		if(enemyStars == 0){
+			gameStatus = Status.VICTORY;
+		}
+		else if(playerStars == 0){
+			gameStatus = Status.DEFEAT;
+		}
 
+		List<Missile> blownUp = new LinkedList<Missile>();
 		synchronized(missiles) {		
-//			for(Missile m: missiles) {
-//				m.update();
-//			}
-			List<Missile> blownUp = new LinkedList<Missile>();
 			for(Missile m: missiles) {
 				synchronized(stars) {
 					m.update(vibrator);	
@@ -218,8 +237,8 @@ public class MainGamePanel extends SurfaceView implements
 				if(m.isHit())
 					blownUp.add(m);
 			}
-			missiles.removeAll(blownUp);
 		}
+		missiles.removeAll(blownUp);
 	}
 
 }

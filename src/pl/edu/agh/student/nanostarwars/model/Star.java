@@ -1,14 +1,10 @@
 package pl.edu.agh.student.nanostarwars.model;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Vibrator;
-import android.util.Log;
 
 public class Star extends GameElement {
 	
