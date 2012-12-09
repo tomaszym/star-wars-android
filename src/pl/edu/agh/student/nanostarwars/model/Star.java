@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Vibrator;
 import android.util.Log;
 
 public class Star extends GameElement {
@@ -101,14 +102,23 @@ public class Star extends GameElement {
 	 * Fired when missile reaches its target
 	 * @param m
 	 */
-	public synchronized void hitBy(Missile m) {
+	public synchronized void hitBy(Missile m, Vibrator vib) {
+		boolean vibrationNeeded = false;
+		
 		if(m.getOwner().equals(this.player)) { // it's your cell
 			this.points += m.getPoints();
 		} else { //enemy hit
 			this.points -= m.getPoints();
 			if(points < 0) {// owner changed
 				this.points = -this.points;
+				if(this.player != null)
+					if(this.player.getNumber() == 0)
+						vibrationNeeded = true;
 				this.player = m.getOwner();
+				
+				if(vibrationNeeded) {
+					vib.vibrate(200);
+				}
 			}
 		}
 	}
