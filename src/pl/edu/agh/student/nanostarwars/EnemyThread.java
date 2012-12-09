@@ -1,7 +1,11 @@
 package pl.edu.agh.student.nanostarwars;
 
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+
+import android.util.Log;
 
 import pl.edu.agh.student.nanostarwars.model.Missile;
 import pl.edu.agh.student.nanostarwars.model.Player;
@@ -25,7 +29,7 @@ public class EnemyThread extends Thread {
 	}
 	
 	public void run() {
-		
+		Log.i("EnemyThread", "begins the run!");
 		while(running) {
 			
 			try {
@@ -35,13 +39,66 @@ public class EnemyThread extends Thread {
 				e.printStackTrace();
 			}
 			synchronized(players) {
-				Player agressor = players.get(1+rand.nextInt(players.size()-1));
+				Log.d("EnemyThread", "players locked");
+				synchronized(stars) {
+					Log.d("EnemyThread", "stars locked");
+					
+					Player agressor = players.get(1+rand.nextInt(players.size()-1));
+					Iterator<Star> agressiveStars = getStars(agressor);
+					Log.d("EnemyThread", "agressors picked");
+					
+					
+					Player victim = players.get(0);
+					Star victimStar = getWeakestStar(victim);
+					
+					Log.d("EnemyThread", "victim picked");
+					
+					while(agressiveStars.hasNext()) {
+						Log.d("EnemyThread", "FIRE!!");
+						agressiveStars.next().sendMissile(victimStar);
+					}
+				}
 			} 
 			
 			
 		}
 		
 	}
+	
+	private Iterator<Star> getStars(Player p) {
+		List<Star> list = new LinkedList<Star>();
+		synchronized(players) {
+			synchronized(stars){
+				for(Star s: stars) {
+					if(p.equals(s.getPlayer())) {
+						list.add(s);
+					}
+				}				
+			}
+		}
+		return list.subList(0, rand.nextInt(list.size())).iterator();
+	}
+	
+	private Star getWeakestStar(Player p) {
+		Iterator<Star> it = getStars(p);
+		Star weakest = null;
+		Star tmp = null;
+		if(it.hasNext())
+			weakest = it.next();
+		else
+			return null;
+		synchronized(players) {
+			synchronized(stars) {
+				if(it.hasNext()) {
+					tmp = it.next();
+					if(tmp.getPoints() < weakest.getPoints())
+						weakest = tmp;
+				}
+			}
+		}
+		return weakest;
+	}
+	
 	
 	public void setRunning(boolean running) { this.running = running;}
 }

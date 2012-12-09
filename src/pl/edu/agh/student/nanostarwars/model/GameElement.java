@@ -10,6 +10,9 @@ public abstract class GameElement {
 	protected Bitmap bitmap;
 	
 	protected Player player;
+	public Player getPlayer() {
+		return player;
+	}
 	
 	public GameElement(Bitmap bitmap, Vec position, Player player) {
 		this.bitmap = bitmap;

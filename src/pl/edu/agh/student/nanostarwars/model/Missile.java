@@ -63,7 +63,7 @@ public class Missile {
 		this.owner = owner;
 		this.points = points;
 		this.target = target;
-		this.distance = Vec.distance(target.getPosition(), cannon.getPosition());
+		this.distance = Vec.distance(target.getPosition(), cannon.getPosition()); // TODO nullpointer exception
 		this.diffX = cannon.getPosition().x()-target.getPosition().x();
 		this.diffY = cannon.getPosition().y()-target.getPosition().y();
 		this.distanceMoved = 0;

@@ -46,6 +46,9 @@ public class MainGamePanel extends SurfaceView implements
 		this.stars = new ArrayList<Star>();
 		this.missiles = new ArrayList<Missile>();
 		this.userPointer = new Pointer(BitmapFactory.decodeResource(getResources(), R.drawable.arrow),null,null);
+		
+
+		enemyThread = new EnemyThread(players, stars, missiles);
 	}
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
@@ -64,7 +67,9 @@ public class MainGamePanel extends SurfaceView implements
 		
 		generateMap(6,2);
 		thread.setRunning(true);
+		enemyThread.setRunning(true);
 		thread.start();
+		enemyThread.start();
 	}
 
 	public void generateMap(int neutralCount, int playersCount) {
