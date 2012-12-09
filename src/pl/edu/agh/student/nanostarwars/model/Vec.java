@@ -18,6 +18,10 @@ public class Vec {
 		this.x = x;
 		this.y = y;
 	}
+	public Vec(long x, long y) {
+		this.x = (int) x;
+		this.y = (int) y;
+	}
 
 	public int y() {
 		return y;

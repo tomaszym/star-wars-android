@@ -35,14 +35,23 @@ public class Star extends GameElement {
 		this.size = size;
 		this.points = 0;
 		this.spawnCounter = 0;
+		if(player == null) {
+			this.points = size/10*5;
+		}
 	}
 
+	public boolean hasPlayer() {
+		return this.player != null;
+	}
+	
 	@Override
 	public synchronized void update() {
-		this.spawnCounter++;
-		if(spawnCounter >= 1000/size){
-			points++;
-			this.spawnCounter = 0;
+		if(this.player != null) {
+			this.spawnCounter++;
+			if(spawnCounter >= 1000/size){
+				points++;
+				this.spawnCounter = 0;
+			}
 		}
 	}
 	
@@ -85,6 +94,22 @@ public class Star extends GameElement {
 		int pointsToBeSent = points/2;
 		points -= pointsToBeSent;
 		
-		return new Missile(this.player, pointsToBeSent, star);
+		return new Missile(this.player, pointsToBeSent, star, this );
+	}
+	
+	/**
+	 * Fired when missile reaches its target
+	 * @param m
+	 */
+	public synchronized void hitBy(Missile m) {
+		if(m.getOwner().equals(this.player)) { // it's your cell
+			this.points += m.getPoints();
+		} else { //enemy hit
+			this.points -= m.getPoints();
+			if(points < 0) {// owner changed
+				this.points = -this.points;
+				this.player = m.getOwner();
+			}
+		}
 	}
 }

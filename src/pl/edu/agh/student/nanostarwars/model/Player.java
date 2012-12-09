@@ -29,4 +29,19 @@ public class Player {
         mPaint.setColor(color);
         this.color = mPaint;
 	}
+	public boolean equals(Object thatObj) {
+		if (thatObj == null)
+			return false;
+		if (this == thatObj)
+			return true;
+		if (!(this.getClass().equals(thatObj.getClass())))
+			return false;
+		Player thatPlayer = (Player) thatObj;
+		
+		return testEquals(thatPlayer);
+	}
+	
+	protected boolean testEquals(Player that) {
+		return this.getNumber() == that.getNumber();
+	}
 }

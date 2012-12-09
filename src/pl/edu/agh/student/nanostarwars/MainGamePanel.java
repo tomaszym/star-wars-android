@@ -1,6 +1,7 @@
 package pl.edu.agh.student.nanostarwars;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -20,9 +21,14 @@ import android.view.SurfaceView;
 public class MainGamePanel extends SurfaceView implements
 		SurfaceHolder.Callback {
 	private MainThread thread;
+	private EnemyThread enemyThread;
 	private Random randomize = null;
 
 	private int speed = 10;
+	/**
+	 * Important assumption: 
+	 * players.get(0) is the HUMAN PLAYER
+	 */
 	private List<Player> players = null;
 	private List<Star> stars = null;
 	private List<Missile> missiles = null;
@@ -47,14 +53,21 @@ public class MainGamePanel extends SurfaceView implements
 	}
 
 	public void surfaceCreated(SurfaceHolder holder) {
-		Player player = new Player(0, Color.RED);
-		players.add(player);
-		generateMap(6);
+		
+		Player human = new Player(0, Color.RED);
+		Player pc = new Player(1, Color.BLUE);
+		
+		synchronized(players) {
+			players.add(human);
+			players.add(pc);
+		}
+		
+		generateMap(6,2);
 		thread.setRunning(true);
 		thread.start();
 	}
 
-	public void generateMap(int neutralCount) {
+	public void generateMap(int neutralCount, int playersCount) {
 		while (stars.size() < neutralCount) {
 			int size = randomize.nextInt(20) + 10 + randomize.nextInt(20);
 			Vec position = new Vec(randomize.nextInt(getWidth() - 2 * size)
@@ -65,19 +78,25 @@ public class MainGamePanel extends SurfaceView implements
 			}
 		}
 		
-		int size = 15;
-		Vec position = new Vec(randomize.nextInt(getWidth() - 2 * size)
-				+ size, randomize.nextInt(getHeight() - 2 * size) + size);
-		stars.add(new Star(null,position, new Player(1, Color.GREEN), size));
+		for(int i=0; i<playersCount; i++) {
+			int size = 15;
+			Vec position = new Vec(randomize.nextInt(getWidth() - 2 * size)
+					+ size, randomize.nextInt(getHeight() - 2 * size) + size);
+			synchronized(players) {
+				stars.add(new Star(null,position, players.get(i), size));	
+			}
+		}
 	}
 
 	private boolean safeDistance(Vec position, int size) {
 		boolean safeDistance = true;
-		for (Star otherStar : stars) {
-			if (Vec.distance(position, otherStar.getPosition()) < size
-					+ otherStar.getSize() + 10) {
-				safeDistance = false;
-				break;
+		synchronized(stars) {
+			for (Star otherStar : stars) {
+				if (Vec.distance(position, otherStar.getPosition()) < size
+						+ otherStar.getSize() + 10) {
+					safeDistance = false;
+					break;
+				}
 			}
 		}
 		return safeDistance;
@@ -96,12 +115,22 @@ public class MainGamePanel extends SurfaceView implements
 
 	protected void render(Canvas canvas) {
 		canvas.drawColor(Color.BLACK);
-		for (Star star : stars) {
-			star.draw(canvas);
+		synchronized(stars) {
+			for (Star star : stars) {
+				star.draw(canvas);
+			}	
 		}
+		
 		if (userPointer.isVisible()){
 			userPointer.draw(canvas);
 		}
+		
+		synchronized(missiles) {
+			for (Missile m: missiles) {
+				m.draw(canvas);
+			}			
+		}
+		
 	}
 
 	// events when touching the screen
@@ -113,8 +142,7 @@ public class MainGamePanel extends SurfaceView implements
 		switch (eventAction) {
 		case MotionEvent.ACTION_DOWN: // touch down so check if the finger is on
 			for (Star star : stars) {
-				if (Vec.distance(star.getPosition(), touchPosition) < star
-						.getSize() + 50) {
+				if (Vec.distance(star.getPosition(), touchPosition) < star.getSize() + 50 && star.hasPlayer()) {
 					selectedStar = star;
 					userPointer.setSourcePosition(star.getPosition());
 					break;
@@ -133,7 +161,9 @@ public class MainGamePanel extends SurfaceView implements
 			if (selectedStar != null) {
 				for (Star star : stars) {
 					if (star != selectedStar && (Vec.distance(star.getPosition(), touchPosition) < star.getSize() + 50)) {
-						selectedStar.sendMissile(star);
+						synchronized(missiles) {
+							missiles.add(selectedStar.sendMissile(star));
+						}
 						selectedStar = null;
 						break;
 					}
@@ -153,8 +183,25 @@ public class MainGamePanel extends SurfaceView implements
 	}
 	
 	public void update() {
-		for(Star star : stars){
-			star.update();
+		synchronized(stars) {
+			for(Star star : stars){
+				star.update();
+			}
+		}
+
+		synchronized(missiles) {		
+			for(Missile m: missiles) {
+				m.update();
+			}
+			List<Missile> blownUp = new LinkedList<Missile>();
+			for(Missile m: missiles) {
+				synchronized(stars) {
+					m.update();	
+				}
+				if(m.isHit())
+					blownUp.add(m);
+			}
+			missiles.removeAll(blownUp);
 		}
 	}
 
