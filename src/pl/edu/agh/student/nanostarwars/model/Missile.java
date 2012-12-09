@@ -95,6 +95,22 @@ public class Missile {
 	public void draw(Canvas canvas) {
 		Paint bgPaint = new Paint();
 		bgPaint.setColor(Color.WHITE);
-		canvas.drawCircle(this.position.x(), this.position.y(), 15, bgPaint);
+		canvas.drawCircle(this.position.x(), this.position.y(), 10, bgPaint);
+		drawPointsOnStar(canvas);
+	}	
+	
+	private int getSize() {
+		return this.points;
+	}
+	private void drawPointsOnStar(Canvas canvas) {
+		int size = 30;
+		Paint txtPaint = new Paint();
+		txtPaint.setColor(Color.BLACK);
+		txtPaint.setShadowLayer(4, 0, 0, Color.WHITE);
+		txtPaint.setTextSize((int)(size/1.5));
+		canvas.drawText(Integer.toString(this.getPoints()),
+						this.position.x()-txtPaint.measureText(Integer.toString(this.getSize()))/2,
+						this.position.y()+size/6,
+						txtPaint);
 	}
 }

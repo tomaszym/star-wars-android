@@ -11,6 +11,7 @@ import pl.edu.agh.student.nanostarwars.model.Pointer;
 import pl.edu.agh.student.nanostarwars.model.Star;
 import pl.edu.agh.student.nanostarwars.model.Vec;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -36,6 +37,8 @@ public class MainGamePanel extends SurfaceView implements
 	private List<Missile> missiles = null;
 	Star selectedStar;
 	Pointer userPointer;
+	private Bitmap background;
+	private Bitmap starBitmap;
 
 	public MainGamePanel(Context context) {
 		super(context);
@@ -48,6 +51,8 @@ public class MainGamePanel extends SurfaceView implements
 		this.stars = new ArrayList<Star>();
 		this.missiles = new ArrayList<Missile>();
 		this.userPointer = new Pointer(BitmapFactory.decodeResource(getResources(), R.drawable.arrow),null,null);
+		this.background = BitmapFactory.decodeResource(getResources(), R.drawable.background2);
+		this.starBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.star2);
 		this.vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 		enemyThread = new EnemyThread(players, stars, missiles);
 	}
@@ -58,8 +63,8 @@ public class MainGamePanel extends SurfaceView implements
 
 	public void surfaceCreated(SurfaceHolder holder) {
 		
-		Player human = new Player(0, Color.RED);
-		Player pc = new Player(1, Color.BLUE);
+		Player human = new Player(0, Color.parseColor("#FF88FFFF"));
+		Player pc = new Player(1, Color.parseColor("#FFFF88"));
 		
 		synchronized(players) {
 			players.add(human);
@@ -78,13 +83,14 @@ public class MainGamePanel extends SurfaceView implements
 	}
 
 	public void generateMap(int neutralCount, int playersCount) {
+		
 		while (stars.size() < neutralCount) {
 			int size = randomize.nextInt(20) + 10 + randomize.nextInt(20);
 			Vec position = new Vec(randomize.nextInt(getWidth() - 2 * size)
 					+ size, randomize.nextInt(getHeight() - 2 * size) + size);
 			
 			if (safeDistance(position, size)) {
-				stars.add(new Star(null, position, null, size));
+				stars.add(new Star(starBitmap, position, null, size));
 			}
 		}
 		
@@ -93,7 +99,7 @@ public class MainGamePanel extends SurfaceView implements
 			Vec position = new Vec(randomize.nextInt(getWidth() - 2 * size)
 					+ size, randomize.nextInt(getHeight() - 2 * size) + size);
 			synchronized(players) {
-				stars.add(new Star(null,position, players.get(i), size));	
+				stars.add(new Star(starBitmap,position, players.get(i), size));	
 			}
 		}
 	}
@@ -103,7 +109,7 @@ public class MainGamePanel extends SurfaceView implements
 		synchronized(stars) {
 			for (Star otherStar : stars) {
 				if (Vec.distance(position, otherStar.getPosition()) < size
-						+ otherStar.getSize() + 10) {
+						+ otherStar.getSize() + 30) {
 					safeDistance = false;
 					break;
 				}
@@ -125,7 +131,7 @@ public class MainGamePanel extends SurfaceView implements
 
 	protected void render(Canvas canvas) {
 		canvas.drawColor(Color.BLACK);
-		canvas.drawBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.background2), 85, 150,  null);
+		canvas.drawBitmap(this.background, 85, 150,  null);
 		synchronized(stars) {
 			for (Star star : stars) {
 				star.draw(canvas);

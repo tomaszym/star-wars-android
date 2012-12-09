@@ -59,23 +59,29 @@ public class Star extends GameElement {
 	public void draw(Canvas canvas) {
 		if(player == null){
 			Paint bgPaint = new Paint();
-			bgPaint.setColor(Color.GRAY);
-			canvas.drawCircle(this.position.x(), this.position.y(), this.getSize(), bgPaint);
+			bgPaint.setColor(Color.WHITE);
+//			canvas.drawCircle(this.position.x(), this.position.y(), this.getSize(), bgPaint);
+			canvas.drawCircle(this.position.x(), this.position.y(), 12, bgPaint);
+			canvas.drawBitmap(this.bitmap, this.position.x() - 25, this.position.y() - 25, null);
 			drawPointsOnStar(canvas);
 		}
 		else{
-			canvas.drawCircle(this.position.x(), this.position.y(), this.getSize(), player.getColor());	
+//			canvas.drawCircle(this.position.x(), this.position.y(), this.getSize(), player.getColor());	
+
+			canvas.drawCircle(this.position.x(), this.position.y(), 12, player.getColor());
+			canvas.drawBitmap(this.bitmap, this.position.x() - 25, this.position.y() - 25, null);
 			drawPointsOnStar(canvas);
 		}
 	}
 
 	private void drawPointsOnStar(Canvas canvas) {
 		Paint txtPaint = new Paint();
-		txtPaint.setColor(Color.WHITE);
-		txtPaint.setTextSize((int)(this.getSize()/1.5));
+		txtPaint.setColor(Color.BLACK);
+		txtPaint.setShadowLayer(1, 0, 0, Color.WHITE);
+		txtPaint.setTextSize((int)(this.getSize()));
 		canvas.drawText(Integer.toString(this.getPoints()),
-						this.position.x()-txtPaint.measureText(Integer.toString(this.getSize()))/2,
-						this.position.y()+this.getSize()/6,
+						this.position.x()-txtPaint.measureText(Integer.toString(this.getSize()+15))/2,
+						this.position.y()+this.getSize()/2,
 						txtPaint);
 	}
 	
