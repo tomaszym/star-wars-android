@@ -3,7 +3,6 @@ package pl.edu.agh.student.nanostarwars.model;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.util.Log;
 
 
 public class Missile {
@@ -63,7 +62,7 @@ public class Missile {
 		this.owner = owner;
 		this.points = points;
 		this.target = target;
-		this.distance = Vec.distance(target.getPosition(), cannon.getPosition()); // TODO nullpointer exception
+		this.distance = Vec.distance(target.getPosition(), cannon.getPosition());
 		this.diffX = cannon.getPosition().x()-target.getPosition().x();
 		this.diffY = cannon.getPosition().y()-target.getPosition().y();
 		this.distanceMoved = 0;
@@ -73,7 +72,7 @@ public class Missile {
 	}
 	
 	/**
-	 * Moves missle and checks if hit
+	 * Moves missile and checks if hit
 	 */
 	public void update() {
 		this.position = newPosition();
