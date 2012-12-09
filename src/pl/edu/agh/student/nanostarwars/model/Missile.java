@@ -3,6 +3,7 @@ package pl.edu.agh.student.nanostarwars.model;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Vibrator;
 
 
 public class Missile {
@@ -74,11 +75,11 @@ public class Missile {
 	/**
 	 * Moves missile and checks if hit
 	 */
-	public void update() {
+	public void update(Vibrator vib) {
 		this.position = newPosition();
 		if(this.position.equals(target.getPosition()))
 		{
-			target.hitBy(this);
+			target.hitBy(this, vib);
 			this.hit = true;
 		}	
 	}

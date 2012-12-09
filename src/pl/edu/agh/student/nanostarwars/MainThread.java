@@ -1,7 +1,6 @@
 package pl.edu.agh.student.nanostarwars;
 
 import pl.edu.agh.student.nanostarwars.MainGamePanel.Status;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Canvas;

@@ -14,6 +14,7 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.os.Vibrator;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -27,6 +28,7 @@ public class MainGamePanel extends SurfaceView implements
 	
 	public enum Status {RUNNING, VICTORY, DEFEAT};
 
+	private Vibrator vibrator;
 	private int speed = 10;
 	/**
 	 * Important assumption: 
@@ -50,8 +52,7 @@ public class MainGamePanel extends SurfaceView implements
 		this.stars = new ArrayList<Star>();
 		this.missiles = new ArrayList<Missile>();
 		this.userPointer = new Pointer(BitmapFactory.decodeResource(getResources(), R.drawable.arrow),null,null);
-		
-
+		this.vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 		enemyThread = new EnemyThread(players, stars, missiles);
 	}
 
@@ -74,6 +75,10 @@ public class MainGamePanel extends SurfaceView implements
 		enemyThread.setRunning(true);
 		thread.start();
 		enemyThread.start();
+	}
+	
+	public void vibrate(long time) {
+		vibrator.vibrate(time);
 	}
 
 	public void generateMap(int neutralCount, int playersCount) {
@@ -127,6 +132,7 @@ public class MainGamePanel extends SurfaceView implements
 
 	protected void render(Canvas canvas) {
 		canvas.drawColor(Color.BLACK);
+		canvas.drawBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.background2), 85, 150,  null);
 		synchronized(stars) {
 			for (Star star : stars) {
 				star.draw(canvas);
@@ -219,11 +225,8 @@ public class MainGamePanel extends SurfaceView implements
 		List<Missile> blownUp = new LinkedList<Missile>();
 		synchronized(missiles) {		
 			for(Missile m: missiles) {
-				m.update();
-			}
-			for(Missile m: missiles) {
 				synchronized(stars) {
-					m.update();	
+					m.update(vibrator);	
 				}
 				if(m.isHit())
 					blownUp.add(m);
